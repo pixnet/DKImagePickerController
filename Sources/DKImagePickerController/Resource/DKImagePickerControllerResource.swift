@@ -35,7 +35,7 @@ public class DKImagePickerControllerResource: NSObject {
     }
     
     public class func blueTickImage() -> UIImage {
-        return imageForResource("tick_blue", stretchable: false, cacheable: false)
+        return imageForResource("btn_checkbox_active_dm", stretchable: false, cacheable: false)
     }
     
     public class func cameraImage() -> UIImage {

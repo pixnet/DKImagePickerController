@@ -16,7 +16,7 @@ let DKImageGroupCellIdentifier = "DKImageGroupCellIdentifier"
 }
 
 class DKAssetGroupCell: UITableViewCell, DKAssetGroupCellType {
-    static var preferredHeight: CGFloat = 70
+    static var preferredHeight: CGFloat = 71
 
     class DKAssetGroupSeparator: UIView {
 
@@ -35,55 +35,43 @@ class DKAssetGroupCell: UITableViewCell, DKAssetGroupCellType {
     fileprivate lazy var thumbnailImageView: UIImageView = {
         let thumbnailImageView = UIImageView()
         thumbnailImageView.contentMode = .scaleAspectFill
+        thumbnailImageView.layer.cornerRadius = 3
         thumbnailImageView.clipsToBounds = true
+        
 
         return thumbnailImageView
     }()
 
     lazy var groupNameLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont.boldSystemFont(ofSize: 13)
+        label.font = UIFont(name: "PingFangTC-Regular", size: 15)
+        label.textColor = UIColor(red: 45/255, green: 45/255, blue: 45/255, alpha: 1)
+        
         return label
     }()
 
-    lazy var totalCountLabel: UILabel = {
-        let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 10)
-        label.textColor = UIColor.gray
-        return label
-    }()
-
+    
     var customSelectedBackgroundView: UIView = {
         let selectedBackgroundView = UIView()
-
+        
         let selectedFlag = UIImageView(image: DKImagePickerControllerResource.blueTickImage())
+
         selectedFlag.frame = CGRect(x: selectedBackgroundView.bounds.width - selectedFlag.bounds.width - 20,
                                     y: (selectedBackgroundView.bounds.width - selectedFlag.bounds.width) / 2,
                                     width: selectedFlag.bounds.width, height: selectedFlag.bounds.height)
         selectedFlag.autoresizingMask = [.flexibleLeftMargin, .flexibleTopMargin, .flexibleBottomMargin]
         selectedBackgroundView.addSubview(selectedFlag)
-
+        
         return selectedBackgroundView
-    }()
-
-    lazy var customSeparator: DKAssetGroupSeparator = {
-        let separator = DKAssetGroupSeparator(frame: CGRect(x: 10, y: self.bounds.height - 1, width: self.bounds.width, height: 0.5))
-
-        separator.backgroundColor = UIColor.lightGray
-        separator.autoresizingMask = [.flexibleWidth, .flexibleTopMargin]
-        return separator
     }()
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-
+        
         self.selectedBackgroundView = self.customSelectedBackgroundView
 
         self.contentView.addSubview(self.thumbnailImageView)
         self.contentView.addSubview(self.groupNameLabel)
-        self.contentView.addSubview(self.totalCountLabel)
-
-        self.addSubview(self.customSeparator)
     }
 
     required init?(coder aDecoder: NSCoder) {
@@ -92,30 +80,29 @@ class DKAssetGroupCell: UITableViewCell, DKAssetGroupCellType {
 
     override func layoutSubviews() {
         super.layoutSubviews()
-
-        let imageViewY = CGFloat(10)
-        let imageViewHeight = self.contentView.bounds.height - 2 * imageViewY
-        self.thumbnailImageView.frame = CGRect(x: imageViewY,
-                                               y: imageViewY,
+        let spacingHeight:CGFloat = 6.5
+        
+        let imageViewHeight = CGFloat(56)
+        self.thumbnailImageView.frame = CGRect(x: CGFloat(15),
+                                               y: CGFloat(spacingHeight),
                                                width: imageViewHeight,
                                                height: imageViewHeight)
 
         self.groupNameLabel.frame = CGRect(
             x: self.thumbnailImageView.frame.maxX + 10,
-            y: self.thumbnailImageView.frame.minY + 5,
+            y: self.thumbnailImageView.frame.minY + 15,
             width: 200,
-            height: 20)
-
-        self.totalCountLabel.frame = CGRect(
-            x: self.groupNameLabel.frame.minX,
-            y: self.thumbnailImageView.frame.maxY - 20,
-            width: 200,
-            height: 20)
+            height: 26)
     }
 
     func configure(with assetGroup: DKAssetGroup, tag: Int, dataManager: DKImageGroupDataManager, imageRequestOptions: PHImageRequestOptions) {
         self.tag = tag
-        groupNameLabel.text = assetGroup.groupName
+        let name = assetGroup.groupName!
+        let attributed = NSMutableAttributedString(string: name)
+        attributed.addAttribute(.kern, value: 1.07, range: NSRange(location: 0, length: attributed.length - 1))
+
+        groupNameLabel.attributedText = attributed
+        
         if assetGroup.totalCount == 0 {
             thumbnailImageView.image = DKImagePickerControllerResource.emptyAlbumIcon()
         } else {
@@ -128,8 +115,16 @@ class DKAssetGroupCell: UITableViewCell, DKAssetGroupCellType {
                     }
             }
         }
-        totalCountLabel.text = String(assetGroup.totalCount)
     }
+    
+    open func setLabelBold(bold: Bool) {
+        if (bold == true) {
+            groupNameLabel.font = UIFont(name: "PingFangTC-Medium", size: 15)
+        } else {
+            groupNameLabel.font = UIFont(name: "PingFangTC-Regular", size: 15)
+        }
+    }
+    
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -177,6 +172,8 @@ class DKAssetGroupListVC: UITableViewController, DKImageGroupDataManagerObserver
     private var groupDataManager: DKImageGroupDataManager!
 
     internal weak var imagePickerController: DKImagePickerController!
+    
+    fileprivate let cellSpacingHeight: CGFloat = CGFloat(15)
 
     init(imagePickerController: DKImagePickerController,
          defaultAssetGroup: PHAssetCollectionSubtype?,
@@ -202,6 +199,7 @@ class DKAssetGroupListVC: UITableViewController, DKImageGroupDataManagerObserver
         self.tableView.register(cellType, forCellReuseIdentifier: DKImageGroupCellIdentifier)
         self.tableView.rowHeight = cellType.preferredHeight
         self.tableView.separatorStyle = .none
+        self.tableView.contentInset = UIEdgeInsets(top: 6.5,left: 0,bottom: 6.5,right: 0)
 
         self.clearsSelectionOnViewWillAppear = false
 
@@ -263,7 +261,7 @@ class DKAssetGroupListVC: UITableViewController, DKImageGroupDataManagerObserver
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let groups = self.displayGroups
-            , let cell = tableView.dequeueReusableCell(withIdentifier: DKImageGroupCellIdentifier, for: indexPath) as? DKAssetGroupCellType else {
+            , let cell = tableView.dequeueReusableCell(withIdentifier: DKImageGroupCellIdentifier, for: indexPath) as? DKAssetGroupCell else {
                 assertionFailure("Expect groups and cell")
                 return UITableViewCell()
         }
@@ -272,8 +270,14 @@ class DKAssetGroupListVC: UITableViewController, DKImageGroupDataManagerObserver
             assertionFailure("Expect group")
             return UITableViewCell()
         }
-        
+
         cell.configure(with: assetGroup, tag: indexPath.row + 1, dataManager: groupDataManager, imageRequestOptions: groupThumbnailRequestOptions)
+        
+        if assetGroup.groupId == self.selectedGroup {
+            cell.setLabelBold(bold: true)
+        } else {
+            cell.setLabelBold(bold: false)
+        }
 
         return cell as! UITableViewCell
     }
@@ -291,8 +295,20 @@ class DKAssetGroupListVC: UITableViewController, DKImageGroupDataManagerObserver
         }
 
         self.selectedGroup = groups[indexPath.row]
+        
+        // change the selected group to bold, and unselected to normal
+        for cell in tableView.visibleCells {
+            let c = cell as! DKAssetGroupCell
+            if c.tag == indexPath.row + 1 {
+                c.setLabelBold(bold: true)
+            } else {
+                c.setLabelBold(bold: false)
+            }
+        }
+        
         selectedGroupDidChangeBlock?(self.selectedGroup)
     }
+    
 
     // MARK: - DKImageGroupDataManagerObserver methods
 

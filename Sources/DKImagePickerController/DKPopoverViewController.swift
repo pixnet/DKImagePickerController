@@ -53,16 +53,16 @@ open class DKPopoverViewController: UIViewController {
         
         var contentView: UIView! {
             didSet {
-                self.contentView.layer.cornerRadius = 5
+                self.contentView.layer.cornerRadius = 15
                 self.contentView.clipsToBounds = true
                 self.contentView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
                 self.addSubview(self.contentView)
             }
         }
         
-        let arrowWidth: CGFloat = 20
-        let arrowHeight: CGFloat = 10
-        var arrowColor = ArrowDefaultColor()
+        let arrowWidth: CGFloat = 15
+        let arrowHeight: CGFloat = 13
+        var arrowColor = UIColor.white
         var arrowOffset = CGPoint.zero
         
         fileprivate let arrowImageView: UIImageView = UIImageView()
@@ -177,7 +177,7 @@ open class DKPopoverViewController: UIViewController {
         self.popoverView.transform = self.popoverView.transform.translatedBy(x: 0, y: -(self.popoverView.bounds.height / 2)).scaledBy(x: 0.1, y: 0.1)
         UIView.animate(withDuration: 0.6, delay: 0, usingSpringWithDamping: 0.7, initialSpringVelocity: 1.3, options: .allowUserInteraction, animations: {
             self.popoverView.transform = CGAffineTransform.identity
-            self.view.backgroundColor = UIColor(white: 0.4, alpha: 0.4)
+            self.view.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.6)
         }, completion: nil)
     }
     
@@ -194,7 +194,7 @@ open class DKPopoverViewController: UIViewController {
     }
     
     func calculatePopoverViewFrame() -> CGRect {
-        let popoverY = self.fromView.convertOriginToWindow().y + self.fromView.bounds.height
+        let popoverY = self.fromView.convertOriginToWindow().y + self.fromView.bounds.height + 18
         
         let preferredContentSize = self.contentViewController.preferredContentSize
         var popoverWidth = preferredContentSize.width
@@ -206,7 +206,7 @@ open class DKPopoverViewController: UIViewController {
             }
         }
         
-        let popoverHeight = min(preferredContentSize.height + self.popoverView.arrowHeight, view.bounds.height - popoverY - 40)
+        let popoverHeight = max(preferredContentSize.height + self.popoverView.arrowHeight, view.bounds.height - popoverY + 10)
         
         return CGRect(
             x: (self.view.bounds.width - popoverWidth) / 2,

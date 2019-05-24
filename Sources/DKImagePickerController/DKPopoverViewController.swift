@@ -116,6 +116,7 @@ open class DKPopoverViewController: UIViewController {
     private var contentViewController: UIViewController!
     private var fromView: UIView!
     private var popoverView: DKPopoverView!
+    private var backgroundView: UIControl!
     
     // MARK: - Observers
     
@@ -124,18 +125,18 @@ open class DKPopoverViewController: UIViewController {
     override open func loadView() {
         super.loadView()
         
-        let backgroundView = UIControl(frame: self.view.frame)
+        self.backgroundView = UIControl(frame: self.calculateOverlayFrame())
         backgroundView.backgroundColor = UIColor.clear
         backgroundView.addTarget(self, action: #selector(dismiss as () -> Void), for: .touchUpInside)
         backgroundView.autoresizingMask = self.view.autoresizingMask
-        self.view = backgroundView
     }
     
     override open func viewDidLoad() {
         super.viewDidLoad()
         
-        self.view.backgroundColor = UIColor(white: 0, alpha: 0.6)
+        self.backgroundView.backgroundColor = UIColor(white: 0, alpha: 0.6)
         self.popoverView = DKPopoverView(arrowColor: self.arrowColor)
+        self.view.addSubview(self.backgroundView)
         self.view.addSubview(self.popoverView)
     }
     
@@ -167,7 +168,6 @@ open class DKPopoverViewController: UIViewController {
         self.popoverView.transform = self.popoverView.transform.translatedBy(x: 0, y: -(self.popoverView.bounds.height / 2)).scaledBy(x: 0.1, y: 0.1)
         UIView.animate(withDuration: 0.6, delay: 0, usingSpringWithDamping: 0.7, initialSpringVelocity: 1.3, options: .allowUserInteraction, animations: {
             self.popoverView.transform = CGAffineTransform.identity
-            self.view.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.6)
         }, completion: nil)
     }
     
@@ -176,11 +176,31 @@ open class DKPopoverViewController: UIViewController {
         
         UIView.animate(withDuration: 0.2, animations: {
             self.popoverView.transform = self.popoverView.transform.translatedBy(x: 0, y: -(self.popoverView.bounds.height / 2)).scaledBy(x: 0.01, y: 0.01)
-            self.view.backgroundColor = UIColor.clear
+            self.backgroundView.backgroundColor = UIColor.clear
         }, completion: { result in
             self.view.removeFromSuperview()
             self.removeFromParent()
         })
+    }
+    
+    func calculateOverlayFrame() -> CGRect {
+        let overlayY = self.fromView.convertOriginToWindow().y + self.fromView.bounds.height
+        
+        var bgWidth = UIScreen.main.bounds.width
+        if bgWidth == UIView.noIntrinsicMetric {
+            if UI_USER_INTERFACE_IDIOM() == .pad {
+                bgWidth = self.view.bounds.width * 0.6
+            } else {
+                bgWidth = self.view.bounds.width
+            }
+        }
+        
+        return CGRect(
+            x: (self.view.bounds.width - bgWidth) / 2,
+            y: overlayY,
+            width: self.view.bounds.width,
+            height:  self.view.bounds.height - overlayY
+        )
     }
     
     func calculatePopoverViewFrame() -> CGRect {

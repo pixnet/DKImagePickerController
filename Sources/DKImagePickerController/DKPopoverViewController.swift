@@ -206,7 +206,7 @@ open class DKPopoverViewController: UIViewController {
             }
         }
         
-        let popoverHeight = min(preferredContentSize.height + self.popoverView.arrowHeight, view.bounds.height - popoverY + 10)
+        let popoverHeight = min(preferredContentSize.height + self.popoverView.arrowHeight + 10, view.bounds.height - popoverY + 5)
         
         return CGRect(
             x: (self.view.bounds.width - popoverWidth) / 2,

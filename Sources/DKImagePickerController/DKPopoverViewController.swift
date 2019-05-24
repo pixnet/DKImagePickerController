@@ -204,7 +204,7 @@ open class DKPopoverViewController: UIViewController {
     }
     
     func calculatePopoverViewFrame() -> CGRect {
-        let popoverY = self.fromView.convertOriginToWindow().y + self.fromView.bounds.height + 18
+        let popoverY = self.fromView.convertOriginToWindow().y + self.fromView.bounds.height + 10
         
         let preferredContentSize = self.contentViewController.preferredContentSize
         var popoverWidth = preferredContentSize.width

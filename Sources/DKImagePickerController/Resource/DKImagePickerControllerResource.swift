@@ -39,7 +39,7 @@ public class DKImagePickerControllerResource: NSObject {
     }
     
     public class func cameraImage() -> UIImage {
-        return imageForResource("camera", stretchable: false, cacheable: false)
+        return imageForResource("ic_camera_m", stretchable: false, cacheable: false)
     }
     
     public class func videoCameraIcon() -> UIImage {

@@ -19,9 +19,13 @@ public class DKAssetGroupDetailCameraCell: DKAssetGroupDetailBaseCell {
         super.init(frame: frame)
         
         let cameraImageView = UIImageView(frame: self.bounds)
-        cameraImageView.contentMode = .center
+        cameraImageView.contentMode = .scaleToFill
         cameraImageView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         cameraImageView.image = DKImagePickerControllerResource.cameraImage()
+        let cameraX = (self.contentView.frame.width - 45) / 2
+        let cameraY = (self.contentView.frame.height - 45) / 2
+        cameraImageView.frame = CGRect(x: cameraX, y: cameraY, width: 45, height: 45)
+        
         self.contentView.addSubview(cameraImageView)
         
         self.contentView.backgroundColor = UIColor(white: 0.9, alpha: 1.0)
